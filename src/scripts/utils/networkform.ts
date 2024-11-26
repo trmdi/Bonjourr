@@ -56,7 +56,7 @@ export default function networkForm(targetId: string) {
 			form.classList.remove('valid')
 
 			let input = document.getElementById(inputId)
-			input.setAttribute('value', input.value)
+			input.setAttribute('value', value)
 			input.setAttribute('placeholder', value)
 		}
 

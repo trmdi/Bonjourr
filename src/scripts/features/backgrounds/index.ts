@@ -1,4 +1,4 @@
-import unsplashBackgrounds from './unsplash'
+import providerBackgrounds from './provider'
 import localBackgrounds from './local'
 import { rgbToHex } from '../../utils'
 import { eventDebounce } from '../../utils/debounce'
@@ -16,7 +16,7 @@ type UpdateOptions = {
 }
 
 export default function initBackground(data: Sync.Storage, local: Local.Storage) {
-	const type = data.background_type || 'unsplash'
+	const type = data.background_type
 	const blur = data.background_blur
 	const brightness = data.background_bright
 
@@ -30,7 +30,15 @@ export default function initBackground(data: Sync.Storage, local: Local.Storage)
 		bgsecond.style.transform = 'scale(1.1) translateX(0px) translate3d(0, 0, 0)'
 	}
 
-	type === 'local' ? localBackgrounds() : unsplashBackgrounds({ unsplash: data.unsplash, cache: local.unsplashCache })
+	if (type === 'local') {
+        localBackgrounds()
+    } else {
+        providerBackgrounds({
+            name: type,
+            sync: data[type],
+            cache: local[`${type}Cache`]
+        })
+    }
 }
 
 //
@@ -89,11 +97,11 @@ export function updateBackgroundOption({ freq, refresh }: UpdateOptions) {
 	const isLocal = i_type.value === 'local'
 
 	if (freq !== undefined) {
-		isLocal ? localBackgrounds({ freq }) : unsplashBackgrounds(undefined, { every: freq })
+		isLocal ? localBackgrounds({ freq }) : providerBackgrounds(undefined, { every: freq })
 	}
 
 	if (refresh) {
-		isLocal ? localBackgrounds({ refresh }) : unsplashBackgrounds(undefined, { refresh })
+		isLocal ? localBackgrounds({ refresh }) : providerBackgrounds(undefined, { refresh })
 	}
 }
 

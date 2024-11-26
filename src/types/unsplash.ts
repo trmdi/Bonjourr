@@ -1,6 +1,6 @@
-declare namespace Unsplash {
+declare namespace WallpaperProvider {
 	type Local = {
-		[key in Unsplash.Sync['lastCollec']]: Unsplash.Image[]
+		[key in WallpaperProvider.Sync['lastCollec']]: WallpaperProvider.Image[]
 	}
 
 	type CollectionTypes = 'night' | 'noon' | 'day' | 'evening' | 'user'
@@ -9,8 +9,8 @@ declare namespace Unsplash {
 		time?: number
 		every: Frequency
 		collection: string
-		pausedImage?: Unsplash.Image
-		lastCollec: Unsplash.CollectionTypes
+		pausedImage?: WallpaperProvider.Image
+		lastCollec: WallpaperProvider.CollectionTypes
 	}
 
 	interface Image {

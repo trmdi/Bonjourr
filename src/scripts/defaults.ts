@@ -128,13 +128,6 @@ export const SYNC_DEFAULT: Sync.Storage = {
 		background: '#fff2',
 	},
 	worldclocks: [],
-	unsplash: {
-		every: 'hour',
-		collection: '',
-		lastCollec: 'day',
-		pausedImage: undefined,
-		time: undefined,
-	},
 	weather: {
 		ccode: undefined,
 		city: undefined,
@@ -186,11 +179,20 @@ export const LOCAL_DEFAULT: Local.Storage = {
 	selectedId: '',
 	idsList: [],
 	quotesCache: [],
-	unsplashCache: {
-		noon: [],
-		day: [],
-		evening: [],
-		night: [],
-		user: [],
-	},
+}
+
+export const BACKGROUND_LOCAL_DEFAULT = {
+	noon: [],
+	day: [],
+	evening: [],
+	night: [],
+	user: [],
+}
+
+export const BACKGROUND_SYNC_DEFAULT = {
+	every: 'hour',
+	collection: '',
+	lastCollec: 'day',
+	pausedImage: undefined,
+	time: undefined,
 }

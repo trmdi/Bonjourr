@@ -434,7 +434,7 @@ aside form.valid button {
 }
 
 #digital_options.shown,
-#unsplash_options.shown,
+#provider_options.shown,
 #quotes_url.shown {
 	max-height: 120px;
 }

@@ -36,14 +36,23 @@ export async function apiWebSocket(path: string): Promise<WebSocket | undefined>
 }
 
 export async function apiFetch(path: string): Promise<Response | undefined> {
-	for (const url of apiList) {
-		try {
-			return await fetch(url + path)
-		} catch (error) {
-			console.warn(error)
+    if (path.charAt(0) !== '/') {
+        try {
+            return await fetch(path)
+        } catch (error) {
+            console.warn(error)
 			await new Promise((r) => setTimeout(() => r(true), 200))
-		}
-	}
+        }
+    } else {
+        for (const url of apiList) {
+            try {
+                return await fetch(url + path)
+            } catch (error) {
+                console.warn(error)
+                await new Promise((r) => setTimeout(() => r(true), 200))
+            }
+        }
+    }
 }
 
 export function stringMaxSize(str: string = '', size: number) {

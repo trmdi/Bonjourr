@@ -1,5 +1,5 @@
 import { randomString, turnRefreshButton, freqControl, isEvery } from '../../utils'
-import unsplashBackgrounds from './unsplash'
+import providerBackgrounds from './provider'
 import { imgBackground } from '.'
 import onSettingsLoad from '../../utils/onsettingsload'
 import { IS_MOBILE } from '../../defaults'
@@ -50,7 +50,7 @@ async function initLocalBackgrounds() {
 	if (ids.length === 0) {
 		const data = await storage.sync.get('unsplash')
 		const local = await storage.local.get('unsplashCache')
-		unsplashBackgrounds({ unsplash: data.unsplash, cache: local.unsplashCache })
+		providerBackgrounds({ name: 'unsplash', sync: data.unsplash, cache: local.unsplashCache })
 		return
 	}
 
@@ -311,7 +311,7 @@ function createThumbnail(blob: Blob | undefined, id: string, isSelected: boolean
 			document.getElementById('credit-container')?.classList.toggle('shown', true)
 			const data = await storage.sync.get('unsplash')
 			const local = await storage.local.get('unsplashCache')
-			unsplashBackgrounds({ unsplash: data.unsplash, cache: local.unsplashCache })
+			providerBackgrounds({ name: 'unsplash', sync: data.unsplash, cache: local.unsplashCache })
 		}, 100)
 	}
 

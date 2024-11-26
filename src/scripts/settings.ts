@@ -9,7 +9,7 @@ import hideElements from './features/hide'
 import moveElements from './features/move'
 import interfacePopup from './features/popup'
 import localBackgrounds from './features/backgrounds/local'
-import unsplashBackgrounds, { bonjourrCollections } from './features/backgrounds/unsplash'
+import providerBackgrounds, { bonjourrCollection } from './features/backgrounds/provider'
 import storage, { getSyncDefaults } from './storage'
 import customFont, { fontIsAvailableInSubset } from './features/fonts'
 import { backgroundFilter, updateBackgroundOption } from './features/backgrounds'
@@ -112,8 +112,6 @@ function initOptionsValues(data: Sync.Storage) {
 	setInput('i_bright', data.background_bright ?? 0.8)
 	setInput('i_row', data.linksrow || 8)
 	setInput('i_linkstyle', data.linkstyle || 'default')
-	setInput('i_type', data.background_type || 'unsplash')
-	setInput('i_freq', data.unsplash?.every)
 	setInput('i_dark', data.dark || 'system')
 	setInput('i_favicon', data.favicon ?? '')
 	setInput('i_tabtitle', data.tabtitle ?? '')
@@ -141,7 +139,6 @@ function initOptionsValues(data: Sync.Storage) {
 	setInput('i_analog-background-opacity', opacityFromHex(data.analogstyle?.background ?? '#fff2'))
 	setInput('i_clocksize', data.clock?.size ?? 5)
 	setInput('i_timezone', data.clock?.timezone || 'auto')
-	setInput('i_collection', data.unsplash?.collection ?? '')
 	setInput('i_geol', data.weather?.geolocation || 'approximate')
 	setInput('i_ccode', data.weather?.ccode || 'US')
 	setInput('i_units', data.weather?.unit ?? 'metric')
@@ -235,11 +232,11 @@ function initOptionsValues(data: Sync.Storage) {
 
 	// Backgrounds options init
 	paramId('local_options')?.classList.toggle('shown', data.background_type === 'local')
-	paramId('unsplash_options')?.classList.toggle('shown', data.background_type === 'unsplash')
+	paramId('provider_options')?.classList.toggle('shown', data.background_type !== 'local')
 
-	// Unsplash collection
-	paramId('i_collection')?.setAttribute('value', data?.unsplash?.collection ?? '')
-	paramId('i_collection')?.setAttribute('placeholder', data?.unsplash?.collection || bonjourrCollections[data?.unsplash?.lastCollec ?? 'day'])
+    document.querySelector<HTMLSelectElement>('#i_type')!.value = data.background_type
+    settingsBackgroundForm({name: data.background_type, ...data[data.background_type]})
+
 
 	// Quotes option display
 	paramId('quotes_options')?.classList.toggle('shown', data.quotes?.on)
@@ -388,10 +385,11 @@ function initOptionsEvents() {
 
 	paramId('f_collection').addEventListener('submit', function (this, event) {
 		event.preventDefault()
-		unsplashBackgrounds(undefined, {
+		providerBackgrounds(undefined, {
 			collection: stringMaxSize(paramId('i_collection').value, 256),
 		})
 	})
+
 
 	// Custom backgrounds
 
@@ -858,29 +856,20 @@ function showall(val: boolean, event: boolean) {
 
 async function selectBackgroundType(cat: string) {
 	document.getElementById('local_options')?.classList.toggle('shown', cat === 'local')
-	document.getElementById('unsplash_options')?.classList.toggle('shown', cat === 'unsplash')
+	document.getElementById('provider_options')?.classList.toggle('shown', cat !== 'local')
 
 	if (cat === 'local') {
 		localBackgrounds({ settings: document.getElementById('settings') as HTMLElement })
 		setTimeout(() => localBackgrounds(), 100)
-	}
+	} else {
+        const data = await storage.sync.get()
+        providerBackgrounds({
+            name: cat,
+            sync: data[cat],
+            cache: data[`${cat}Cache`]
+        })
 
-	if (cat === 'unsplash') {
-		const data = await storage.sync.get()
-		const local = await storage.local.get('unsplashCache')
-
-		if (!data.unsplash) return
-
-		document.querySelector<HTMLSelectElement>('#i_freq')!.value = data.unsplash.every || 'hour'
-		document.getElementById('credit-container')?.classList.toggle('shown', true)
-		setTimeout(
-			() =>
-				unsplashBackgrounds({
-					unsplash: data.unsplash,
-					cache: local.unsplashCache,
-				}),
-			100
-		)
+        document.getElementById('credit-container')?.classList.toggle('shown', true)
 	}
 
 	storage.sync.set({ background_type: cat })
@@ -902,6 +891,27 @@ function settingsFooter() {
 	if (version) {
 		version.textContent = SYNC_DEFAULT.about.version
 	}
+}
+
+export function settingsBackgroundForm(sync: Storage.Sync) {
+    const i_freq = paramId('i_freq')
+    const i_collection = paramId('i_collection')
+    const label = document.querySelector('label[for="i_collection"]')
+
+    if (sync.every && i_freq) {
+        i_freq.value = sync.every
+    }
+
+    if (sync.collection && i_collection) {
+        i_collection.setAttribute('value', sync.collection)
+        i_collection.setAttribute('placeholder', sync.collection)
+    } else if (i_collection) {
+        i_collection.setAttribute('placeholder', bonjourrCollection(sync.lastCollec))
+    }
+
+    if (sync.name && label) {
+        label.textContent = tradThis('Unsplash collection').replace('Unsplash', sync.name.replace(/^\w/, c => c.toUpperCase()))
+    }
 }
 
 // 	Mobile settings drawer bar
